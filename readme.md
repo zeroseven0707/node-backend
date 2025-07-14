@@ -70,8 +70,28 @@ function router(req, res) {
   if (match) return match.handler(req, res);
   res.writeHead(404); res.end('Not Found');
 }
-
 module.exports = { router, addRoute };
+```
+##### core/response.js
+```
+function json(res, statusCode, data) {
+  res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(data));
+}
+
+function success(res, data = {}, message = 'Success') {
+  json(res, 200, { success: true, message, data });
+}
+
+function error(res, statusCode = 500, message = 'Internal Server Error') {
+  json(res, statusCode, { success: false, message });
+}
+
+module.exports = {
+  json,
+  success,
+  error
+};
 ```
 ##### core/middleware.js
 Engine middleware manual seperti di Express.
@@ -103,6 +123,19 @@ const { userController } = require('../controllers/user.controller');
 
 addRoute('GET', '/users', userController.index);
 addRoute('POST', '/users', userController.create);
+```
+##### routes/index.route.js
+```
+const { addRoute } = require('../core/router');
+const { json } = require('../core/response');
+
+addRoute('GET', '/', (req, res) => {
+  json(res, 200, {
+    message: 'Welcome to Node.js Vanilla API',
+    status: 'OK'
+  });
+});
+
 ```
 ##### controllers/user.controller.js
 Handler untuk endpoint user.
